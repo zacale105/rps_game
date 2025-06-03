@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Center</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .choices {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .choice-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .choice-btn:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #computer-choice {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #666;
+        }
+        #wins-counter {
+            margin-top: 15px;
+            font-size: 20px;
+            color: #4CAF50;
+        }
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #cc0000;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .reset-btn:hover {
+            background-color: #b30000;
+        }
+        .play-tictactoe-btn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #2196F3;
+            color: white;
+            transition: background-color 0.3s;
+            display: none;
+        }
+        .play-tictactoe-btn:hover {
+            background-color: #1976D2;
+        }
+        .unlock-animation {
+            animation: unlockEffect 1s ease-out;
+        }
+        @keyframes unlockEffect {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Game Center</h1>
+    <div class="game-container">
+        <h2>Rock Paper Scissors</h2>
+        <p>Win 3 games to unlock Tic Tac Toe!</p>
+        <div id="wins-counter">Wins: 0/3</div>
+        <p>Make your choice:</p>
+        <div class="choices">
+            <button class="choice-btn" onclick="play('rock')">Rock</button>
+            <button class="choice-btn" onclick="play('paper')">Paper</button>
+            <button class="choice-btn" onclick="play('scissors')">Scissors</button>
+        </div>
+        <div id="computer-choice"></div>
+        <div id="result"></div>
+        <button id="play-tictactoe" class="play-tictactoe-btn" onclick="window.location.href='/tictactoe'">Play Tic Tac Toe</button>
+        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        // Check initial unlock status
+        window.onload = async function() {
+            try {
+                const response = await fetch('/check_unlock');
+                const data = await response.json();
+                updateWinsCounter(data.wins);
+                if (data.tictactoe_unlocked) {
+                    unlockTicTacToe();
+                }
+            } catch (error) {
+                console.error('Error checking unlock status:', error);
+            }
+        };
+
+        // Rock Paper Scissors Game
+        async function play(choice) {
+            try {
+                const response = await fetch('/play', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ choice: choice })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('computer-choice').textContent = 
+                    `Computer chose: ${data.computer_choice}`;
+                document.getElementById('result').textContent = data.result;
+                
+                updateWinsCounter(data.wins);
+                
+                if (data.tictactoe_unlocked) {
+                    unlockTicTacToe();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'An error occurred!';
+            }
+        }
+
+        function updateWinsCounter(wins) {
+            document.getElementById('wins-counter').textContent = `Wins: ${wins}/3`;
+        }
+
+        function unlockTicTacToe() {
+            const tictactoeBtn = document.getElementById('play-tictactoe');
+            if (tictactoeBtn.style.display !== 'inline-block') {
+                tictactoeBtn.style.display = 'inline-block';
+                tictactoeBtn.classList.add('unlock-animation');
+                const result = document.getElementById('result');
+                result.textContent = 'Congratulations! You\'ve unlocked Tic Tac Toe!';
+                result.style.color = '#4CAF50';
+            }
+        }
+
+        async function resetGame() {
+            try {
+                const response = await fetch('/reset', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                updateWinsCounter(data.wins);
+                document.getElementById('computer-choice').textContent = '';
+                document.getElementById('result').textContent = '';
+                document.getElementById('play-tictactoe').style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Failed to reset game';
+            }
+        }
+    </script>
+</body>
+</html> 
