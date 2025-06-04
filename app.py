@@ -1,3 +1,11 @@
+'''
+This is a simple Rock Paper Scissors game with a twist.
+You need to win 3 games in a row to unlock Tic Tac Toe.
+
+The game is hosted at https://rockpaperscissors.onrender.com/
+
+The code is hosted at https://github.com/yourusername/your-repo
+'''
 from flask import Flask, render_template, request, jsonify
 import random
 
