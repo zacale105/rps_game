@@ -90,6 +90,13 @@
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+        .win-image {
+            display: none;
+            max-width: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+            background: transparent;
+        }
     </style>
 </head>
 <body>
@@ -106,6 +113,7 @@
         </div>
         <div id="computer-choice"></div>
         <div id="result"></div>
+        <img id="win-image" src="https://media.giphy.com/media/3o6fIUZTTDl0IDjbZS/giphy.gif" class="win-image" alt="Victory celebration!">
         <button id="play-tictactoe" class="play-tictactoe-btn" onclick="window.location.href='/tictactoe'">Play Tic Tac Toe</button>
         <button class="reset-btn" onclick="resetGame()">Reset Game</button>
     </div>
@@ -142,6 +150,15 @@
                     `Computer chose: ${data.computer_choice}`;
                 document.getElementById('result').textContent = data.result;
                 
+                // Show win image only when Tic Tac Toe is unlocked
+                const winImage = document.getElementById('win-image');
+                if (data.tictactoe_unlocked && data.wins === 3) {
+                    winImage.style.display = 'block';
+                    document.getElementById('result').textContent = 'Congratulations! You\'ve unlocked Tic Tac Toe!';
+                } else {
+                    winImage.style.display = 'none';
+                }
+                
                 updateWinsCounter(data.wins);
                 
                 if (data.tictactoe_unlocked) {
@@ -162,9 +179,6 @@
             if (tictactoeBtn.style.display !== 'inline-block') {
                 tictactoeBtn.style.display = 'inline-block';
                 tictactoeBtn.classList.add('unlock-animation');
-                const result = document.getElementById('result');
-                result.textContent = 'Congratulations! You\'ve unlocked Tic Tac Toe!';
-                result.style.color = '#4CAF50';
             }
         }
 
@@ -179,6 +193,7 @@
                 document.getElementById('computer-choice').textContent = '';
                 document.getElementById('result').textContent = '';
                 document.getElementById('play-tictactoe').style.display = 'none';
+                document.getElementById('win-image').style.display = 'none';
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('result').textContent = 'Failed to reset game';

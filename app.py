@@ -6,10 +6,10 @@ The game is hosted at https://rockpaperscissors.onrender.com/
 
 The code is hosted at https://github.com/yourusername/your-repo
 '''
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for
 import random
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 # List of possible choices for Rock Paper Scissors
 CHOICES = ['rock', 'paper', 'scissors']
@@ -92,6 +92,9 @@ def play():
     # Update win counter but cap it at 3
     if result == "You win!" and rps_wins < WINS_REQUIRED:
         rps_wins += 1
+        # Check if this win unlocked Tic Tac Toe
+        if rps_wins == WINS_REQUIRED:
+            result = "Congratulations! You've unlocked Tic Tac Toe!"
     
     return jsonify({
         'computer_choice': computer_choice,
